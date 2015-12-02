@@ -117,8 +117,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  // TODO: don't cheat, let it flow to the bottom
 	  getInitialState: function getInitialState() {
+	    this._setValue = this.props.initialValue;
 	    return {
-	      value: this.props.initialValue || '',
+	      value: this._setValue || '',
 	      isOpen: false,
 	      highlightedIndex: null
 	    };
@@ -130,8 +131,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._performAutoCompleteOnKeyUp = false;
 	  },
 	
-	  componentWillReceiveProps: function componentWillReceiveProps() {
+	  componentWillReceiveProps: function componentWillReceiveProps(newProps) {
 	    this._performAutoCompleteOnUpdate = true;
+	    if (newProps.initialValue !== this._setValue) {
+	      this._setValue = newProps.initialValue;
+	      this.setState({
+	        value: newProps.initialValue
+	      });
+	    }
 	  },
 	
 	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
@@ -344,17 +351,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return React.cloneElement(menu, { ref: 'menu' });
 	  },
 	
-	  getActiveItemValue: function getActiveItemValue() {
-	    if (this.state.highlightedIndex === null) return '';else {
-	      var item = this.props.items[this.state.highlightedIndex];
-	      // items can match when we maybeAutoCompleteText, but then get replaced by the app
-	      // for the next render? I think? TODO: file an issue (alab -> enter -> type 'a' for
-	      // alabamaa and then an error would happen w/o this guard, pretty sure there's a
-	      // better way)
-	      return item ? this.props.getItemValue(item) : '';
-	    }
-	  },
-	
 	  handleInputBlur: function handleInputBlur() {
 	    if (this._ignoreBlur) return;
 	    this.setState({
@@ -385,7 +381,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return React.createElement('div', { style: { display: 'inline-block' } }, React.createElement('input', _extends({}, this.props.inputProps, {
 	      role: 'combobox',
 	      'aria-autocomplete': 'both',
-	      'aria-label': this.getActiveItemValue(),
 	      ref: 'input',
 	      onFocus: this.handleInputFocus,
 	      onBlur: this.handleInputBlur,
